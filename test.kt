@@ -45,33 +45,22 @@ data class ItemData(
 // -----------------------
 
 fun processList(inputList: List<Any?>?): List<ItemData>? {
-    val myArray = ArrayList<ItemData>()
-    inputList?.let {
-        // lista viene vacia o lista viene lleno de elementos nulos
-        if (it.isEmpty()) return emptyList() else if (it.filterNotNull().isEmpty()) return emptyList()
-        for ((index,value) in it.withIndex()){
-            when (value) {
-                is String -> {
-                    myArray.add(ItemData(originalPos = index, originalValue = value, type = "cadena", info = "L"+"$value".length))
-                }
-                is Int -> {
-                    myArray.add(ItemData(originalPos = index, originalValue = value, type = "entero", info = if(value%10 == 0) "M10" else if (value%5 == 0) "M5" else if (value%2 == 0) "M2" else null))
-                }
-                is Boolean -> myArray.add(ItemData(originalPos = index, originalValue = value, type = "booleano", info = if(value) "Verdadero" else "Falso"))
-                else -> {
-                    value?.let {
-                        myArray.add(ItemData(originalPos = index, originalValue = value, type = null, info = null))
-                    } ?: run {
-                        myArray.add(ItemData(originalPos = index, originalValue = "", type = null, info = null))
-                        //removemos el elemento despues de agregarlo ya que se busca mantener continuidad en indices
-                        myArray.removeAt(index)
-                    }
-                }
-              }
-        }
-        // si la entrada es solo un elemento nulo
-    } ?: run {
-        return null
-    }
-        return myArray
+   var inputInfo: String? = null; var inputType: String? = null
+   return inputList?.mapIndexed { index, value ->  value?.let {
+	    when (value) {
+		is String -> {
+		    inputType = "cadena"
+		    inputInfo = "L${value.length}"
+		}
+		is Int -> {
+		    inputType = "entero"
+		    inputInfo = listOf(10,5,2).firstOrNull { value % it == 0 }?.let { "M$it" }
+		}
+		is Boolean -> {
+		    inputType = "booleano"
+		    inputInfo = if(value) "Verdadero" else "Falso"
+		}
+		else -> { inputType = null; inputInfo = null }
+	    }
+	    ItemData(index, value, inputType, inputInfo)}}?.filterNotNull() //remove the null elements, keeping the index continuity
 }
